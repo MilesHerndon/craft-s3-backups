@@ -1,0 +1,48 @@
+{
+    "name": "milesherndon/s3-backups",
+    "description": "Plugin to backup Craft to AWS S3 ",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "aws",
+        "s3",
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "S3 Backups"
+    ],
+    "support": {
+        "docs": "https://github.com/MilesHerndon/s3-backups/blob/master/README.md",
+        "issues": "https://github.com/MilesHerndon/s3-backups/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "MilesHerndon",
+            "homepage": "https://milesherndon.com"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.1",
+        "aws/aws-sdk-php": "^3.88"
+    },
+    "autoload": {
+        "psr-4": {
+          "milesherndon\\s3backups\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "S3 Backups",
+        "handle": "s3-backups",
+        "hasCpSettings": true,
+        "hasCpSection": true,
+        "changelogUrl": "https://raw.githubusercontent.com/MilesHerndon/s3-backups/master/CHANGELOG.md",
+        "components": {
+            "backupService": "milesherndon\\s3backups\\services\\BackupService",
+            "s3Service": "milesherndon\\s3backups\\services\\S3Service",
+            "notificationService": "milesherndon\\s3backups\\services\\NotificationService"
+        },
+        "class": "milesherndon\\s3backups\\S3Backups"
+    }
+}

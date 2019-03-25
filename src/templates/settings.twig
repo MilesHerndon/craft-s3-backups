@@ -1,0 +1,185 @@
+{#
+/**
+ * S3 Backups plugin for Craft CMS 3.x
+ *
+ * S3 Backups Settings.twig
+ *
+ * @author    MilesHerndon
+ * @copyright Copyright (c) 2019 MilesHerndon
+ * @link      https://milesherndon.com
+ * @package   S3Backups
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("milesherndon\\s3backups\\assetbundles\\s3backups\\S3BackupsAsset") %}
+
+{{ forms.autosuggestField({
+    label: "AWS S3 Key"|t('s3-backups'),
+    id: 'keyId',
+    name: 'keyId',
+    required: true,
+    suggestEnvVars: true,
+    value: settings.keyId,
+    errors: settings.getErrors('keyId'),
+    class: 's3-key-id',
+}) }}
+
+{{ forms.autosuggestField({
+    label: "AWS S3 Secret"|t('s3-backups'),
+    id: 'secret',
+    name: 'secret',
+    required: true,
+    suggestEnvVars: true,
+    value: settings.secret,
+    errors: settings.getErrors('secret'),
+    class: 's3-secret-key',
+}) }}
+
+{% set bucketInput %}
+    <div class="flex fullwidth">
+        {{ forms.select({
+            name: 'bucketSelectionMode',
+            options: [
+                { label: 'Choose…'|t('s3-backups'), value: 'choose' },
+                { label: 'Manual…'|t('s3-backups'), value: 'manual' }
+            ],
+            value: settings.bucketSelectionMode,
+            toggle: true,
+            targetPrefix: '.bsm-'
+        }) }}
+
+        <div class="bsm-choose{% if settings.bucketSelectionMode == 'manual' %} hidden{% endif %}">
+            {{ forms.select({
+                id: 'bucket',
+                name: 'bucket',
+                options: { (settings.bucket): settings.bucket },
+                value: settings.bucketSelectionMode == 'manual' ? settings.bucket,
+                readonly: true,
+                class: 's3-bucket-select'
+            }) }}
+        </div>
+        <div class="bsm-choose{% if settings.bucketSelectionMode == 'manual' %} hidden{% endif %}">
+            <div class="btn s3-refresh-buckets">{{ "Refresh"|t('s3-backups') }}</div>
+        </div>
+        <div class="bsm-choose{% if settings.bucketSelectionMode == 'manual' %} hidden{% endif %}">
+            <div class="spinner hidden"></div>
+        </div>
+
+        <div class="bsm-manual{% if settings.bucketSelectionMode == 'choose' %} hidden{% endif %} flex-grow">
+            {{ forms.autosuggest({
+                label: "Bucket"|t('s3-backups'),
+                class: 'ltr',
+                name: 'manualBucket',
+                suggestEnvVars: true,
+                value: settings.bucket,
+                placeholder: 'Bucket'|t('s3-backups')
+            }) }}
+        </div>
+        <div class="bsm-manual{% if settings.bucketSelectionMode == 'choose' %} hidden{% endif %} flex-grow">
+            {{ forms.autosuggest({
+                label: "Region"|t('s3-backups'),
+                class: 'ltr',
+                name: 'manualRegion',
+                suggestEnvVars: true,
+                value: settings.region,
+                placeholder: 'Region'|t('s3-backups')
+            }) }}
+        </div>
+    </div>
+
+    <input type="hidden" name="region" class="s3-region" value="{{ settings.region }}" />
+{% endset %}
+
+{{ forms.field({
+    label: "AWS S3 Bucket"|t('s3-backups'),
+    id: 'bucket',
+    required: true,
+    errors: settings.getErrors('bucket'),
+}, bucketInput) }}
+
+{{ forms.autosuggestField({
+    label: "Subfolder"|t('s3-backups'),
+    instructions: "If saving at the root of the bucket, leave this empty."|t('s3-backups'),
+    id: 'subfolder',
+    class: 'ltr',
+    name: 'subfolder',
+    suggestEnvVars: true,
+    value: settings.subfolder,
+    errors: settings.getErrors('subfolder'),
+    placeholder: "path/to/subfolder"|t('s3-backups')
+}) }}
+
+{{ forms.autosuggestField({
+    label: "How many total backups should be saved on S3."|t('s3-backups'),
+    instructions: "Set to 0 to keep all backups"|t('s3-backups'),
+    id: 'totalBackups',
+    name: 'totalBackups',
+    suggestEnvVars: true,
+    value: settings.totalBackups,
+    errors: settings.getErrors('totalBackups'),
+    class: 's3-total-backups',
+}) }}
+
+<hr />
+
+<h2>Notifications</h2>
+
+{{ forms.lightswitchField({
+    label: "Enable Notification Emails"|t('s3-backups'),
+    id: 'enableNotifications',
+    name: 'enableNotifications',
+    on: settings.enableNotifications,
+    onLabel: "Enable",
+    offLabel: "Disable",
+    errors: settings.getErrors('enableNotifications'),
+}) }}
+
+<div class="email-settings{% if settings.enableNotifications == false %} hidden{% endif %} flex-grow">
+    {{ forms.textareaField({
+        label: 'Recipients'|t('s3-backups'),
+        instructions: "Add each email recipient's address on a new line."|t('s3-backups'),
+        name: 'emailRecipients',
+        required: true,
+        value: settings.emailRecipients,
+        errors: (settings is defined ? settings.getErrors('emailRecipients') : null)
+    }) }}
+
+    {{ forms.textField({
+        label: "Subject"|t('s3-backups'),
+        instructions: "Subject of the email."|t('s3-backups'),
+        name: 'emailSubject',
+        required: true,
+        value: settings.emailSubject,
+        errors: (settings is defined ? settings.getErrors('emailSubject') : null)
+    }) }}
+
+    {{ forms.textField({
+        label: "From Name"|t('s3-backups'),
+        instructions: "Name on email which appears as the sender."|t('s3-backups'),
+        name: 'fromName',
+        required: true,
+        value: settings.fromName,
+        errors: (settings is defined ? settings.getErrors('fromName') : null)
+    }) }}
+
+    {{ forms.textField({
+        label: "From Email"|t('s3-backups'),
+        instructions: "Email address which appears as sending the email."|t('s3-backups'),
+        name: 'fromEmail',
+        required: true,
+        value: settings.fromEmail,
+        errors: (settings is defined ? settings.getErrors('fromEmail') : null)
+    }) }}
+
+    {{ forms.textField({
+        label: "Reply To"|t('s3-backups'),
+        instructions: "Email address to which replies will go."|t('s3-backups'),
+        name: 'replyEmail',
+        required: true,
+        value: settings.replyEmail,
+        errors: (settings is defined ? settings.getErrors('replyEmail') : null)
+    }) }}
+</div>

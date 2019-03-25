@@ -1,0 +1,35 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * S3 Backups plugin for Craft CMS 3.x
+ *
+ * S3 Backups index.twig
+ *
+ * @author    MilesHerndon
+ * @copyright Copyright (c) 2019 MilesHerndon
+ * @link      https://milesherndon.com
+ * @package   S3Backups
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/elementindex" %}
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("milesherndon\\s3backups\\assetbundles\\s3backups\\S3BackupsAsset") %}
+{% do view.registerAssetBundle("milesherndon\\s3backups\\assetbundles\\indexcpsection\\IndexCPSectionAsset") %}
+
+{% set elementType = 'milesherndon\\s3backups\\elements\\Backup' %}
+{% set title = "S3 Backups" %}
+
+{% block actionButton %}
+    <div class="buttons">
+        <form id="run-backup" method="post">
+            {{ csrfInput() }}
+            {{ redirectInput('s3-backups') }}
+            <input type="hidden" name="action" value="s3-backups/default/run-backup-task">
+            <button class="btn submit icon big">{{ "Run Backup on Site"|t('s3-backups') }}</button>
+        </form>
+    </div>
+{% endblock %}
+

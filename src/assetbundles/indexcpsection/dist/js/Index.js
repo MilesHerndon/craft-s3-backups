@@ -1,0 +1,11 @@
+/**
+ * S3 Backups plugin for Craft CMS
+ *
+ * Index Field JS
+ *
+ * @author    MilesHerndon
+ * @copyright Copyright (c) 2019 MilesHerndon
+ * @link      https://milesherndon.com
+ * @package   S3Backups
+ * @since     1.0.0
+ */
