@@ -12,7 +12,6 @@ namespace milesherndon\s3backups;
 
 use milesherndon\s3backups\services\BackupService;
 use milesherndon\s3backups\services\S3Service;
-use milesherndon\s3backups\variables\S3BackupsVariable;
 use milesherndon\s3backups\models\Settings;
 
 use Craft;
@@ -21,7 +20,6 @@ use craft\base\Plugin;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use yii\base\Event;
 
@@ -89,16 +87,6 @@ class S3Backups extends Plugin
                 $event->rules['cpActionTrigger1'] = 's3-backups/default/load-bucket-data';
                 $event->rules['cpActionTrigger2'] = 's3-backups/default/run-backup';
                 $event->rules['cpActionTrigger3'] = 's3-backups/default/run-backup-task';
-            }
-        );
-
-        Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function (Event $event) {
-                /** @var CraftVariable $variable */
-                $variable = $event->sender;
-                $variable->set('s3Backups', S3BackupsVariable::class);
             }
         );
 
