@@ -16,7 +16,7 @@ use craft\helpers\Db;
 class BackupQuery extends ElementQuery
 {
 
-    // General - Properties
+    // Public Properties
     // =========================================================================
     public $id;
 
@@ -25,7 +25,6 @@ class BackupQuery extends ElementQuery
      */
     public function __construct($elementType, array $config = [])
     {
-        // Default orderBy
         if (!isset($config['orderBy'])) {
             $config['orderBy'] = 's3backups_records.dateCreated';
         }
