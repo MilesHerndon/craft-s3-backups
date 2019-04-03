@@ -49,10 +49,6 @@ class BackupQuery extends ElementQuery
             's3backups_records.bucket'
         ]);
 
-        if ($this->offset !== null && empty($this->offset)) {
-            $this->offset = $this->offset * 2;
-        }
-
         if ($this->orderBy !== null && empty($this->orderBy) && !$this->structureId && !$this->fixedOrder) {
             $this->orderBy = 'elements.dateCreated desc';
         }
