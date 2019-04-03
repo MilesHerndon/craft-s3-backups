@@ -33,8 +33,14 @@ class NotificationService extends Component
      */
     public function sendNotification($backups = [], $results = [])
     {
-        $message = new Message();
+
         $settings = S3Backups::getInstance()->getSettings();
+
+        if (!$settings->enableNotifications) {
+            return false;
+        }
+
+        $message = new Message();
         $recipients = array_map('trim', explode(PHP_EOL, $settings->emailRecipients));
 
         $html = $this->getEmailTemplate([
