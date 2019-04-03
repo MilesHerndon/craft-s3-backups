@@ -5,12 +5,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>{{subject}}</title>
     <style>
-    /* -------------------------------------
-        INLINED WITH htmlemail.io/inline
-    ------------------------------------- */
-    /* -------------------------------------
-        RESPONSIVE AND MOBILE FRIENDLY STYLES
-    ------------------------------------- */
     @media only screen and (max-width: 620px) {
       table[class=body] h1 {
         font-size: 28px !important;
@@ -93,7 +87,7 @@
           <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;">
 
             <!-- START CENTERED WHITE CONTAINER -->
-            <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">S3 Backup has been completed.</span>
+            <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">An S3 Backup has completed.</span>
             <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 3px;">
 
               <!-- START MAIN CONTENT AREA -->
@@ -102,8 +96,18 @@
                   <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                     <tr>
                       <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Hello there,</p>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;"></p>
+                        <h1 style="font-family: sans-serif; font-size: 21px; font-weight: bold; margin: 0; Margin-bottom: 15px;">S3 Backups</h1>
+
+                        <p style="font-family: sans-serif; font-size: 14px; font-weight: bold; margin: 0; Margin-bottom: 15px;">The following backups have been created.</p>
+
+                        {% if backups|length %}
+                          {% for backup in backups %}
+                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">
+                              {{ backup.type|upper }} backup completed at {{ backup.dateCreated|date('m/d/Y H:i:s T') }}<br />
+                              File: {{ backup.filename }}
+                            </p>
+                          {% endfor %}
+                        {% endif %}
                       </td>
                     </tr>
                   </table>
