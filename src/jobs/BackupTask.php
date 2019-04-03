@@ -43,7 +43,7 @@ class BackupTask extends BaseJob
     {
         CraftApp::maxPowerCaptain();
 
-        $totalSteps = 3;
+        $totalSteps = 5;
 
         try {
             $step = 1;
@@ -80,7 +80,15 @@ class BackupTask extends BaseJob
             $this->setProgress($queue, $step / $totalSteps);
 
             S3Backups::$plugin->backupService->cleanUpBackups();
+
+            $step = 4;
+            $this->setProgress($queue, $step / $totalSteps);
+
             S3Backups::$plugin->notificationService->sendNotification($backups);
+
+            $step = 5;
+            $this->setProgress($queue, $step / $totalSteps);
+
             return $response;
         } catch (\Throwable $e) {
             throw $e;
