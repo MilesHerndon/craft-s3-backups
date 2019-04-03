@@ -35,6 +35,11 @@ class Backup extends Element
     /**
      * @var string
      */
+    public $type;
+
+    /**
+     * @var string
+     */
     public $basename;
 
     /**
@@ -46,6 +51,11 @@ class Backup extends Element
      * @var string
      */
     public $bucket;
+
+    /**
+     * @var string
+     */
+    public $location;
 
     /**
      * @inheritdoc
@@ -192,7 +202,7 @@ class Backup extends Element
     protected static function defineSortOptions(): array
     {
         return [
-            'elements.dateCreated' => S3Backups::t('Date Created')
+            'elements.dateCreated' => Craft::t('s3-backups', 'Date Created')
         ];
     }
 
@@ -202,9 +212,9 @@ class Backup extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'id' => S3Backups::t('ID'),
-            'filename' => S3Backups::t('File Name'),
-            'dateCreated' => S3Backups::t('Date Created')
+            'id' => Craft::t('s3-backups', 'ID'),
+            'filename' => Craft::t('s3-backups', 'File Name'),
+            'dateCreated' => Craft::t('s3-backups', 'Date Created')
         ];
     }
 
@@ -217,8 +227,8 @@ class Backup extends Element
 
         $actions[] = Craft::$app->getElements()->createAction([
             'type' => Delete::class,
-            'confirmationMessage' => S3Backups::t('Are you sure you want to delete the selected backups?'),
-            'successMessage' => S3Backups::t('Backups deleted.'),
+            'confirmationMessage' => Craft::t('s3-backups', 'Are you sure you want to delete the selected backups?'),
+            'successMessage' => Craft::t('s3-backups', 'Backups deleted.'),
         ]);
 
         return $actions;

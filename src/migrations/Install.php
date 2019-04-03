@@ -41,11 +41,9 @@ class Install extends Migration
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
         if ($this->createTables()) {
-            $this->createIndexes();
             $this->addForeignKeys();
             // Refresh the db schema caches
             Craft::$app->db->schema->refresh();
-            $this->insertDefaultData();
         }
 
         return true;
@@ -79,9 +77,11 @@ class Install extends Migration
                 '{{%s3backups_records}}',
                 [
                     'id' => $this->primaryKey(),
+                    'type' => $this->string(),
                     'basename' => $this->string(),
                     'filename' => $this->string(),
                     'bucket' => $this->string(),
+                    'location' => $this->string(),
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid(),
@@ -90,30 +90,6 @@ class Install extends Migration
         }
 
         return $tablesCreated;
-    }
-
-    /**
-     * @return void
-     */
-    protected function createIndexes()
-    {
-        // $this->createIndex(
-        //     $this->db->getIndexName(
-        //         '{{%s3backups_records}}',
-        //         'name',
-        //         true
-        //     ),
-        //     '{{%s3backups_records}}',
-        //     'name',
-        //     true
-        // );
-        // Additional commands depending on the db driver
-        switch ($this->driver) {
-            case DbConfig::DRIVER_MYSQL:
-                break;
-            case DbConfig::DRIVER_PGSQL:
-                break;
-        }
     }
 
     /**
@@ -128,13 +104,6 @@ class Install extends Migration
             '{{%s3backups_records}}', 'id',
             '{{%elements}}', 'id', 'CASCADE', null
         );
-    }
-
-    /**
-     * @return void
-     */
-    protected function insertDefaultData()
-    {
     }
 
     /**
