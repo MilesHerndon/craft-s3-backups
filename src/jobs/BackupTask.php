@@ -14,6 +14,7 @@ use milesherndon\s3backups\S3Backups;
 use milesherndon\s3backups\elements\Backup as BackupElement;
 
 use Craft;
+use craft\helpers\App as CraftApp;
 use craft\queue\BaseJob;
 use yii\queue\RetryableJobInterface;
 
@@ -40,51 +41,50 @@ class BackupTask extends BaseJob
      */
     public function execute($queue)
     {
+        CraftApp::maxPowerCaptain();
+
         $totalSteps = 3;
 
         try {
             $step = 1;
             $this->setProgress($queue, $step / $totalSteps);
 
-            $files['backupDBPath'] = S3Backups::$plugin->backupService->exportDatabase();
-            $basename = basename($files['backupDBPath'], '.sql');
-            $files['backupFilePath'] = S3Backups::$plugin->backupService->exportBackupFiles($basename);
+            $files['db'] = S3Backups::$plugin->backupService->exportDatabase();
+            $basename = basename($files['db'], '.sql');
+            $files['files'] = S3Backups::$plugin->backupService->exportBackupFiles($basename);
 
             $step = 2;
             $this->setProgress($queue, $step / $totalSteps);
 
             $backups = [];
-            foreach ($files as $file) {
-                $response = S3Backups::$plugin->s3Service->uploadToS3Multipart($file);
+            foreach ($files as $key => $file) {
+                $response[$key] = S3Backups::$plugin->s3Service->uploadToS3Multipart($file);
+                if ($response[$key]['@metadata']['statusCode'] !== 200) {
+                    return $response[$key];
+                }
 
                 $backup = new BackupElement();
+                $backup->type = $key;
                 $backup->bucket = S3Backups::$plugin->s3Service->getBucketName();
                 $backup->basename = $basename;
                 $backup->filename = basename($file);
-                S3Backups::$plugin->backupService->saveBackup($backup);
+                $backup->location = $response[$key]['ObjectURL'];
+                $save = S3Backups::$plugin->backupService->saveBackup($backup);
 
                 if ($save) {
                     $backups[] = $backup;
                 }
             }
 
-            S3Backups::$plugin->notificationService->sendNotification($backups);
-
             $step = 3;
             $this->setProgress($queue, $step / $totalSteps);
 
             S3Backups::$plugin->backupService->cleanUpBackups();
+            S3Backups::$plugin->notificationService->sendNotification($backups);
+            return $response;
         } catch (\Throwable $e) {
-            return $e->getMessage();
+            throw $e;
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTtr()
-    {
-        return 3600;
     }
 
     // Protected Methods

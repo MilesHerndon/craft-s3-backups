@@ -18,11 +18,7 @@ use milesherndon\s3backups\records\Backup as BackupRecord;
 
 use Craft;
 use craft\web\Controller;
-use craft\helpers\App as CraftApp;
-use craft\helpers\FileHelper;
-use craft\services\Path;
 use yii\base\Exception;
-use ZipArchive;
 
 /**
  * @author    MilesHerndon
@@ -41,14 +37,14 @@ class DefaultController extends Controller
      */
     protected $allowAnonymous = ['get-bucket-data', 'run-backup', 'run-backup-task'];
 
+    // Public Methods
+    // =========================================================================
+
     public function init()
     {
         parent::init();
         $this->defaultAction = 'get-bucket-data';
     }
-
-    // Public Methods
-    // =========================================================================
 
     /**
      * Load bucket data for specified credentials.
@@ -78,12 +74,12 @@ class DefaultController extends Controller
      */
     public function actionRunBackup()
     {
-        CraftApp::maxPowerCaptain();
-
         try {
-            S3Backups::$plugin->backupService->initBackup();
+            $response = S3Backups::$plugin->backupService->initBackup();
             S3Backups::$plugin->backupService->cleanUpBackups();
             S3Backups::$plugin->notificationService->sendNotification();
+
+            return $this->asJson($response);
         } catch (\Throwable $e) {
             return $this->asErrorJson($e->getMessage());
         }
@@ -96,11 +92,9 @@ class DefaultController extends Controller
      */
     public function actionRunBackupTask()
     {
-        CraftApp::maxPowerCaptain();
-
         try {
             S3Backups::$plugin->backupService->executeBackup();
-            Craft::$app->getSession()->setNotice(S3Backups::t('Backup Task Running'));
+            Craft::$app->getSession()->setNotice(Craft::t('s3-backups', 'Backup Task Running'));
         } catch (\Throwable $e) {
             return $this->asErrorJson($e->getMessage());
         }

@@ -17,6 +17,7 @@ use milesherndon\s3backups\jobs\BackupTask;
 
 use Craft;
 use craft\base\Component;
+use craft\helpers\App as CraftApp;
 use craft\helpers\FileHelper;
 use craft\services\Path;
 use yii\base\Exception;
@@ -29,6 +30,12 @@ use ZipArchive;
  */
 class BackupService extends Component
 {
+    // Private Properties
+    // =========================================================================
+
+    /**
+     * @var array Paths to skip
+     */
     private $skipArray = [
         CRAFT_BASE_PATH.'/.env',
         CRAFT_BASE_PATH.'/vendor',
@@ -41,8 +48,14 @@ class BackupService extends Component
         'cpresources'
     ];
 
+    /**
+     * @var object Backup Record
+     */
     private $backupRecord;
 
+    /**
+     * @var integer Buffer size
+     */
     private $buffer = 104800000; // 100MB
 
     // Public Methods
@@ -57,24 +70,26 @@ class BackupService extends Component
         parent::init();
     }
 
-    /*
+    /**
      * Export Craft database
      *
-     * @return Path|error
+     * @return Path
+     * @throws Exception
      */
     public function exportDatabase()
     {
         try {
             return Craft::$app->getDb()->backup();
         } catch (\Throwable $e) {
-            return $e->getMessage();
+            return $e;
         }
     }
 
-    /*
+    /**
      * Export zip of Craft files
      *
-     * @return Path|error
+     * @return string
+     * @throws Exception
      */
     public function exportBackupFiles($basename)
     {
@@ -85,8 +100,8 @@ class BackupService extends Component
             $this->zipData(CRAFT_BASE_PATH, $zipPath);
 
             return $zipPath;
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        } catch (Exception $e) {
+            return $e;
         }
     }
 
@@ -101,27 +116,39 @@ class BackupService extends Component
     }
 
     /**
-     * This function creates a default backup and generates the id
+     * Creates a backup element
      *
      * @return BackupElement
-     * @throws \Exception
+     * @throws Exception
      * @throws \yii\web\ServerErrorHttpException
      * @throws \Throwable
      */
     public function initBackup()
     {
-        $files['backupDBPath'] = $this->exportDatabase();
-        $basename = basename($files['backupDBPath'], '.sql');
-        $files['backupFilePath'] = $this->exportBackupFiles($basename);
+        CraftApp::maxPowerCaptain();
 
-        foreach ($files as $file) {
-            $response[] = S3Backups::$plugin->s3Service->uploadToS3Multipart($file);
+        $files['db'] = $this->exportDatabase();
+        $basename = basename($files['db'], '.sql');
+        $files['files'] = $this->exportBackupFiles($basename);
+
+        foreach ($files as $key => $file) {
+            $response[$key] = S3Backups::$plugin->s3Service->uploadToS3Multipart($file);
+            if ($response[$key]['@metadata']['statusCode'] !== 200) {
+                return $response[$key];
+            }
 
             $backup = new BackupElement();
+            $backup->type = $key;
             $backup->bucket = S3Backups::$plugin->s3Service->getBucketName();
             $backup->basename = $basename;
             $backup->filename = basename($file);
-            $this->saveBackup($backup);
+            $backup->location = $response[$key]['ObjectURL'];
+
+            $save = S3Backups::$plugin->backupService->saveBackup($backup);
+
+            if ($save) {
+                $backups[] = $backup;
+            }
         }
 
         return $response;
@@ -153,7 +180,7 @@ class BackupService extends Component
             $backupRecord = BackupRecord::findOne($backup->id);
 
             if (!$backupRecord) {
-                throw new Exception(Backup::t('No Backup exists with the ID “{id}”', ['id' => $backup->id]));
+                throw new Exception(Craft::t('s3-backups', 'No backup exists with the ID “{id}”', ['id' => $backup->id]));
             }
         }
 
@@ -171,12 +198,20 @@ class BackupService extends Component
             }
 
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $transaction->rollback();
-            throw $e;
+            return $e;
         }
     }
 
+    /**
+     * Create zip file
+     *
+     * @param $source
+     * @param $destination
+     * @return string|bool
+     * @throws Exception
+     */
     public function zipData($source, $destination)
     {
         try {
@@ -208,11 +243,17 @@ class BackupService extends Component
             }
 
             return false;
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        } catch (Exception $e) {
+            return $e;
         }
     }
 
+    /**
+     * Check path to verify it should be processed or skipped
+     *
+     * @param $pathToFind
+     * @return bool
+     */
     public function checkPathsToSkip($pathToFind)
     {
         foreach ($this->skipArray as $path) {
@@ -224,51 +265,25 @@ class BackupService extends Component
         return false;
     }
 
+    /**
+     * Runs cleanup to remove old elements
+     *
+     * @return void
+     * @throws Exception
+     */
     public function cleanUpBackups()
     {
         $totalBackups = Craft::parseEnv(S3Backups::getInstance()->getSettings()->totalBackups);
 
         if ($totalBackups > 0) {
-
-            // TODO: Update to dynamically determine how many files are created for the backup | 2 for zip + sql
             $records = BackupElement::find()->offset($totalBackups * 2)->orderBy('dateCreated desc')->all();
-
             try {
                 foreach ($records as $record) {
-                    // Delete DB Record
                     Craft::$app->elements->deleteElementById($record->id);
                 }
             } catch (Exception $e) {
-                return $e->getMessage();
+                return $e;
             }
         }
-    }
-
-    public function createFileChunks($file)
-    {
-        $largeFile = fopen($file, 'r');
-        $size = filesize($file);
-        $parts = $size / $this->buffer;
-
-        $fileParts = array();
-
-        $name = basename($file);
-
-        for ($i=0;$i<$parts;$i++) {
-            $part = fread($largeFile, $this->buffer);
-
-            $craftPath = new Path;
-            $partPath = $craftPath->getDbBackupPath() . '/' . $name . ".part$i";
-
-            $newFile = fopen($partPath, 'w+');
-
-            fwrite($newFile, $part);
-            array_push($fileParts, $partPath);
-            fclose($newFile);
-        }
-
-        fclose($largeFile);
-
-        return $fileParts;
     }
 }

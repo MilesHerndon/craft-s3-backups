@@ -11,10 +11,12 @@
 namespace milesherndon\s3backups\services;
 
 use milesherndon\s3backups\S3Backups;
+
 use Aws\Credentials\Credentials;
 use Aws\Handler\GuzzleV6\GuzzleHandler;
 use Aws\Rekognition\RekognitionClient;
 use Aws\S3\Exception\S3Exception;
+use Aws\S3\Exception\MultipartUploadException;
 use Aws\S3\S3Client;
 use Aws\S3\MultipartUploader;
 use Aws\Sts\StsClient;
@@ -90,7 +92,7 @@ class S3Service extends Component
      * Upload object on S3.
      *
      * @param $file
-     * @throws \S3Exception
+     * @throws S3Exception
      */
     public function uploadToS3($file)
     {
@@ -105,7 +107,7 @@ class S3Service extends Component
             ]);
             return $result;
         } catch (S3Exception $e) {
-            return $e->getMessage();
+            return $e;
         }
     }
 
@@ -113,7 +115,7 @@ class S3Service extends Component
      * Upload object to S3 through MultiPartUpload
      *
      * @param $file
-     * @throws \S3Exception
+     * @throws MultipartUploadException
      */
     public function uploadToS3Multipart($file)
     {
@@ -129,7 +131,7 @@ class S3Service extends Component
             $result = $uploader->upload();
             return $result;
         } catch (MultipartUploadException $e) {
-            return $e->getMessage();
+            return $e;
         }
     }
 
@@ -137,7 +139,7 @@ class S3Service extends Component
      * Delete multiple object from S3.
      *
      * @param $objects
-     * @throws \S3Exception
+     * @throws S3Exception
      */
     public function deleteMultipleObjects($objects)
     {
@@ -154,7 +156,7 @@ class S3Service extends Component
                 ],
             ]);
         } catch (S3Exception $e) {
-            return $e->getMessage();
+            return $e;
         }
     }
 
@@ -162,7 +164,7 @@ class S3Service extends Component
      * Delete a single object from S3.
      *
      * @param $object
-     * @throws \S3Exception
+     * @throws S3Exception
      */
     public function deleteObject($object)
     {
@@ -175,7 +177,7 @@ class S3Service extends Component
                 'Key' => $this->subfolder . '/' . $object->filename
             ]);
         } catch (S3Exception $e) {
-            return $e->getMessage();
+            return $e;
         }
     }
 

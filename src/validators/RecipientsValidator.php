@@ -34,26 +34,19 @@ class RecipientsValidator extends Validator
     }
 
     /**
-     * Custom validator for email distribution list
+     * Validate recipient email address
      *
-     * @param        $object
-     * @param string $attribute
-     *
-     * @param        $email
-     *
+     * @param $object
+     * @param $attribute
+     * @param $email
      * @return boolean
      */
     private function validateRecipient($object, $attribute, $email): bool
     {
         $email = trim($email);
 
-        // Allow twig syntax
-        if (preg_match('/^{{?(.*?)}}?$/', $email)) {
-            return true;
-        }
-
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->addError($object, $attribute, S3Backups::t('Please make sure all emails are valid.'));
+            $this->addError($object, $attribute, Craft::t('s3-backups', 'Please make sure all emails are valid.'));
 
             return false;
         }

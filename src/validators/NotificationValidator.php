@@ -20,7 +20,7 @@ class NotificationValidator extends Validator
     public $skipOnEmpty = false;
 
     /**
-     * Email notification validation
+     * Validate notification fields being submitted
      *
      * @param $object
      * @param $attribute
@@ -29,23 +29,23 @@ class NotificationValidator extends Validator
     {
         Craft::dd($object);
         if ($object->enableNotifications && !$object->emailRecipients) {
-            $this->addError($object, $attribute, S3Backups::t('Recipients cannot be blank'));
+            $this->addError($object, $attribute, Craft::t('s3-backups', 'Recipients cannot be blank'));
         }
 
         if ($object->enableNotifications && !$object->fromName) {
-            $this->addError($object, $attribute, S3Backups::t('Sender Name cannot be blank'));
+            $this->addError($object, $attribute, Craft::t('s3-backups', 'Sender Name cannot be blank'));
         }
 
         if ($object->enableNotifications && !$object->fromEmail) {
-            $this->addError($object, $attribute, S3Backups::t('Sender Email cannot be blank'));
+            $this->addError($object, $attribute, Craft::t('s3-backups', 'Sender Email cannot be blank'));
         }
 
         if ($object->enableNotifications && !$object->replyEmail) {
-            $this->addError($object, $attribute, S3Backups::t('Reply Email cannot be blank'));
+            $this->addError($object, $attribute, Craft::t('s3-backups', 'Reply Email cannot be blank'));
         }
 
         if ($object->enableNotifications && !$object->emailSubject) {
-            $this->addError($object, $attribute, S3Backups::t('Subject cannot be blank'));
+            $this->addError($object, $attribute, Craft::t('s3-backups', 'Subject cannot be blank'));
         }
     }
 }

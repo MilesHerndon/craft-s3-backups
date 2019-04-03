@@ -31,7 +31,7 @@ class NotificationService extends Component
      * @param $backups
      * @return
      */
-    public function sendNotification($backups = [])
+    public function sendNotification($backups = [], $results = [])
     {
         $message = new Message();
         $settings = S3Backups::getInstance()->getSettings();
@@ -39,7 +39,8 @@ class NotificationService extends Component
 
         $html = $this->getEmailTemplate([
             'subject' => $settings->emailSubject,
-            'backups' => $backups
+            'backups' => $backups,
+            'results' => $results
         ]);
 
         $message->setTo($recipients);

@@ -16,7 +16,6 @@ use milesherndon\s3backups\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
-// use craft\console\Application as ConsoleApplication;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
 use craft\events\RegisterUrlRulesEvent;
@@ -66,10 +65,6 @@ class S3Backups extends Plugin
         parent::init();
         self::$plugin = $this;
 
-        // if (Craft::$app instanceof ConsoleApplication) {
-        //     $this->controllerNamespace = 'milesherndon\s3backups\console\controllers';
-        // }
-
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
@@ -107,18 +102,6 @@ class S3Backups extends Plugin
             ),
             __METHOD__
         );
-    }
-
-    /**
-     * @param string $message
-     * @param array  $params
-     * @param string $language
-     *
-     * @return string
-     */
-    public static function t(string $message, array $params = [], string $language = null): string
-    {
-        return Craft::t('s3-backups', $message, $params, $language);
     }
 
     // Protected Methods
