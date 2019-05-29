@@ -112,6 +112,15 @@
     placeholder: "path/to/subfolder"|t('s3-backups')
 }) }}
 
+{{ forms.textareaField({
+    label: 'Paths to Skip'|t('s3-backups'),
+    instructions: "Add each path to  address on a new line."|t('s3-backups'),
+    name: 'pathsToSkip',
+    required: true,
+    value: settings.pathsToSkip,
+    errors: (settings is defined ? settings.getErrors('pathsToSkip') : null)
+}) }}
+
 {{ forms.autosuggestField({
     label: "How many total backups should be saved on S3."|t('s3-backups'),
     instructions: "Set to 0 to keep all backups"|t('s3-backups'),

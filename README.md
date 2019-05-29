@@ -22,11 +22,12 @@ To install the plugin, follow these instructions.
 
 ## S3 Backups Overview
 
--Insert text here-
+S3 Backups offers a simple way of setting up a backup process to Craft projects. It is easy to setup and run regularly. Before using, you will need a
+AWS account, an AWS Key and Secret, and a bucket to store the backup files.
 
 ## Configuring S3 Backups
 
--Insert text here-
+For AWS settings, those can be saved in the settings section directly, or they can be saved in the .env.
 
 ## Using S3 Backups
 
@@ -36,6 +37,10 @@ To install the plugin, follow these instructions.
 
 Some things to do, and ideas for potential features:
 
-* Release it
+* Add more error handling and error emails
+* Set logging of error messages
+* Add cleanup on queue second attempt
+* Add feature to exclude additonal files from being backed up
+* Add ability to download backup directly from Craft CP
 
 Brought to you by [MilesHerndon](https://milesherndon.com)

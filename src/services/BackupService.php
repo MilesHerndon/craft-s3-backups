@@ -13,15 +13,14 @@ namespace milesherndon\s3backups\services;
 use milesherndon\s3backups\S3Backups;
 use milesherndon\s3backups\elements\Backup as BackupElement;
 use milesherndon\s3backups\records\Backup as BackupRecord;
+use milesherndon\s3backups\helpers\BackupFileHelper;
 use milesherndon\s3backups\jobs\BackupTask;
 
 use Craft;
 use craft\base\Component;
 use craft\helpers\App as CraftApp;
-use craft\helpers\FileHelper;
 use craft\services\Path;
 use yii\base\Exception;
-use ZipArchive;
 
 /**
  * @author    MilesHerndon
@@ -32,21 +31,6 @@ class BackupService extends Component
 {
     // Private Properties
     // =========================================================================
-
-    /**
-     * @var array Paths to skip
-     */
-    private $skipArray = [
-        CRAFT_BASE_PATH.'/.env',
-        CRAFT_BASE_PATH.'/vendor',
-        CRAFT_BASE_PATH.'/node_modules',
-        CRAFT_BASE_PATH.'/storage/backups',
-        CRAFT_BASE_PATH.'/storage/composer-backups',
-        CRAFT_BASE_PATH.'/storage/config-backups',
-        CRAFT_BASE_PATH.'/storage/logs',
-        CRAFT_BASE_PATH.'/storage/runtime',
-        'cpresources'
-    ];
 
     /**
      * @var object Backup Record
@@ -97,7 +81,7 @@ class BackupService extends Component
             $craftPath = new Path;
 
             $zipPath = $craftPath->getDbBackupPath() . '/' . $basename . '.zip';
-            $this->zipData(CRAFT_BASE_PATH, $zipPath);
+            BackupFileHelper::createZipArchive(CRAFT_BASE_PATH, $zipPath);
 
             return $zipPath;
         } catch (Exception $e) {
@@ -202,67 +186,6 @@ class BackupService extends Component
             $transaction->rollback();
             return $e;
         }
-    }
-
-    /**
-     * Create zip file
-     *
-     * @param $source
-     * @param $destination
-     * @return string|bool
-     * @throws Exception
-     */
-    public function zipData($source, $destination)
-    {
-        try {
-            if (extension_loaded('zip')) {
-                if (file_exists($source)) {
-                    $zip = new ZipArchive();
-                    if ($zip->open($destination, ZIPARCHIVE::CREATE)) {
-                        $source = realpath($source);
-                        if (is_dir($source)) {
-                            $iterator = new \RecursiveDirectoryIterator($source);
-                            // skip dot files while iterating
-                            $iterator->setFlags(\RecursiveDirectoryIterator::SKIP_DOTS);
-                            $files = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::SELF_FIRST);
-
-                            foreach ($files as $file) {
-                                $file = realpath($file);
-                                if (is_dir($file) && $this->checkPathsToSkip($file) === false) {
-                                    $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
-                                } elseif (is_file($file) && $this->checkPathsToSkip($file) === false) {
-                                    $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
-                                }
-                            }
-                        } elseif (is_file($source)) {
-                            $zip->addFromString(basename($source), file_get_contents($source));
-                        }
-                    }
-                    return $zip->close();
-                }
-            }
-
-            return false;
-        } catch (Exception $e) {
-            return $e;
-        }
-    }
-
-    /**
-     * Check path to verify it should be processed or skipped
-     *
-     * @param $pathToFind
-     * @return bool
-     */
-    public function checkPathsToSkip($pathToFind)
-    {
-        foreach ($this->skipArray as $path) {
-            if (strpos($pathToFind, $path) !== false) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
