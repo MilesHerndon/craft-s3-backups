@@ -50,7 +50,7 @@ class NotificationService extends Component
         ]);
 
         $message->setTo($recipients);
-        $message->setFrom([$settings->fromName => $settings->fromEmail]);
+        $message->setFrom([$settings->fromEmail => $settings->fromName]);
         $message->setReplyTo($settings->replyEmail);
         $message->setSubject($settings->emailSubject);
         $message->setHtmlBody($html);
