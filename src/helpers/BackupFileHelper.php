@@ -78,7 +78,7 @@ class BackupFileHelper extends FileHelper
 
                             foreach ($files as $file) {
                                 $file = realpath($file);
-                                // Craft::dd(str_replace($source . '/', '', $file));
+
                                 if (is_dir($file) && self::checkFilePathsToSkip($file) === false) {
                                     $zip->addEmptyDir(str_replace($source . '/', '', $file));
                                 } elseif (is_file($file) && self::checkFilePathsToSkip($file) === false) {

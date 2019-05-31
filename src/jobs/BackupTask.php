@@ -73,6 +73,7 @@ class BackupTask extends BaseJob
 
                 if ($save) {
                     $backups[] = $backup;
+                    BackupFileHelper::unlink($file);
                 }
             }
 
