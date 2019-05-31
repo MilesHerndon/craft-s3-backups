@@ -21,7 +21,7 @@ use ZipArchive;
  * @package   S3Backups
  * @since     1.0.1
  */
-class ReportFileHelper extends FileHelper
+class BackupFileHelper extends FileHelper
 {
     // Private Properties
     // =========================================================================
@@ -29,7 +29,7 @@ class ReportFileHelper extends FileHelper
     /**
      * @var array Paths to skip
      */
-    private $skipArray = [
+    public static $skipArray = [
         '.env',
         'vendor',
         'node_modules',
@@ -96,7 +96,7 @@ class ReportFileHelper extends FileHelper
      */
     public static function checkFilePathsToSkip($pathToFind)
     {
-        foreach (self::skipArray as $path) {
+        foreach (self::$skipArray as $path) {
             if (strpos($pathToFind, $path) !== false) {
                 return true;
             }

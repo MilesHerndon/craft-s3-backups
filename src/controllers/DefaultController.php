@@ -77,7 +77,7 @@ class DefaultController extends Controller
         try {
             $response = S3Backups::$plugin->backupService->initBackup();
             S3Backups::$plugin->backupService->cleanUpBackups();
-            S3Backups::$plugin->notificationService->sendNotification();
+            S3Backups::$plugin->notificationService->sendNotification($response);
 
             return $this->asJson($response);
         } catch (\Throwable $e) {
