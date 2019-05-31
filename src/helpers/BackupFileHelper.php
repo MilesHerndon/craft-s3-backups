@@ -30,13 +30,22 @@ class BackupFileHelper extends FileHelper
      * @var array Paths to skip
      */
     public static $skipArray = [
+        'milesherndon-plugins',
+        'tmp',
+        'cache',
+        'trash',
+        'cpanel',
+        'etc',
+        'public_ftp',
+        'ssl',
+        '.DS_Store',
         '.env',
         'vendor',
         'node_modules',
         'storage/backups',
         'storage/composer-backups',
         'storage/config-backups',
-        'storage/logs',
+        'logs',
         'storage/runtime',
         'cpresources'
     ];
@@ -60,6 +69,7 @@ class BackupFileHelper extends FileHelper
                     $zip = new ZipArchive();
                     if ($zip->open($destination, ZIPARCHIVE::CREATE)) {
                         $source = realpath($source);
+
                         if (is_dir($source)) {
                             $iterator = new \RecursiveDirectoryIterator($source);
                             // skip dot files while iterating
@@ -68,8 +78,9 @@ class BackupFileHelper extends FileHelper
 
                             foreach ($files as $file) {
                                 $file = realpath($file);
+                                // Craft::dd(str_replace($source . '/', '', $file));
                                 if (is_dir($file) && self::checkFilePathsToSkip($file) === false) {
-                                    $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+                                    $zip->addEmptyDir(str_replace($source . '/', '', $file));
                                 } elseif (is_file($file) && self::checkFilePathsToSkip($file) === false) {
                                     $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                                 }
@@ -78,6 +89,7 @@ class BackupFileHelper extends FileHelper
                             $zip->addFromString(basename($source), file_get_contents($source));
                         }
                     }
+
                     return $zip->close();
                 }
             }
