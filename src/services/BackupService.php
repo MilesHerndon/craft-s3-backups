@@ -132,10 +132,11 @@ class BackupService extends Component
 
             if ($save) {
                 $backups[] = $backup;
+                BackupFileHelper::unlink($file);
             }
         }
 
-        return $response;
+        return $backups;
     }
 
     public function executeBackup()
