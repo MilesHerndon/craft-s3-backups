@@ -12,6 +12,7 @@ namespace milesherndon\s3backups\jobs;
 
 use milesherndon\s3backups\S3Backups;
 use milesherndon\s3backups\elements\Backup as BackupElement;
+use milesherndon\s3backups\helpers\BackupFileHelper;
 
 use Craft;
 use craft\helpers\App as CraftApp;
@@ -90,7 +91,7 @@ class BackupTask extends BaseJob
             $step = 5;
             $this->setProgress($queue, $step / $totalSteps);
 
-            return $response;
+            return $backups;
         } catch (\Throwable $e) {
             throw $e;
         }
