@@ -74,7 +74,7 @@ class Backup extends Element
      */
     public static function displayName(): string
     {
-        return BackupPlugin::t('Backup');
+        return Craft::t('s3-backups', 'Backup');
     }
 
     /**
