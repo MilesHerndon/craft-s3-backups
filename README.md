@@ -1,3 +1,5 @@
+⛔️ DEPRECATED ⛔️
+
 # S3 Backups plugin for Craft CMS 3.x
 
 Plugin to backup Craft files and database to AWS S3
